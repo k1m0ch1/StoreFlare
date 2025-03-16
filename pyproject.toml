@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "storeflare"
+version = "0.1.0"
+description = ""
+authors = ["k1m0ch1 <yahya.kimochi@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+cfmetrics = "^0.2.0"
+tinydb = "^4.8.2"
+dotenv = "^0.9.9"
+pydantic = "^2.10.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
