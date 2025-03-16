@@ -40,8 +40,6 @@ def checkAnalAndStore(dataAnal):
 cf = cfmetrics.Auth(CF_API_KEY, CF_EMAIL).Account(CF_ACCOUNTID).Zone(CF_ZONEID)
 mantap = cf.get_overview()
 
-import pdb; pdb.set_trace()
-
 oldest_date, newest_date = jsondb.getDateRange()
 if newest_date == datetime.now().strftime("%Y-%m-%d"):
     print("Data is updated, end the program")
