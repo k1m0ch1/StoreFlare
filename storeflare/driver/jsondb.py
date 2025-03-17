@@ -82,7 +82,7 @@ def getDateRange():
         allDates.extend(domain["date_lists"])
 
     if not allDates:
-        return [None, None]
+        return [0, 0]
 
     dateObjects = [datetime.strptime(date, "%Y-%m-%d") for date in allDates]
 
