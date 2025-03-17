@@ -4,7 +4,7 @@ import sys
 import cfmetrics
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from driver import jsondb, sqlite
+from driver import jsondb, sqlite, notion
 from transform import checkAnalAndStore
 
 load_dotenv()
@@ -20,7 +20,7 @@ def main():
         sys.exit(1)
     cmd = sys.argv[1]
 
-    if cmd not in ["json", "sqlite"]:
+    if cmd not in ["json", "sqlite", "notion"]:
         print("Usage: python cli.py <targetdb[json|sqlite]>")
         sys.exit(1)
 
@@ -34,8 +34,14 @@ def main():
     # if not then stored for 30 days before
     source = "web_analytics"
 
-    oldest_date, newest_date = jsondb.getDateRange() if cmd == "json" else sqlite.getDateRange(source) if cmd == "sqlite" else [0, 0]
-    
+    oldest_date, newest_date = [0, 0]
+    if cmd == "json":
+        oldest_date, newest_date = jsondb.getDateRange()
+    if cmd == "sqlite":
+        oldest_date, newest_date = sqlite.getDateRange(source)
+    if cmd == "notion":
+        oldest_date, newest_date = notion.getDateRange()
+
     if oldest_date == 0 and newest_date ==0 :
         print("No data available, lets just gather")
         getWebAnal = cf.get_web_analytics()
