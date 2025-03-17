@@ -6,8 +6,6 @@ from typing import List, Optional
 from tinydb import TinyDB, Query
 from dotenv import load_dotenv
 
-import os
-
 load_dotenv()
 
 CF_ACCOUNTID=os.getenv("CF_ACCOUNTID")
@@ -15,7 +13,7 @@ CF_ZONEID=os.getenv("CF_ZONEID")
 DB_LOCATION=f"{os.getcwd()}/dumped_db"
 
 class Metrics(BaseModel):
-    page_viewwss: Optional[float] = None
+    page_views: Optional[float] = None
     visits: Optional[float]=None
     requests: Optional[float]=None
 
@@ -43,7 +41,7 @@ createIfNotExists(WEB_ANAL_FILE)
 createIfNotExists(OVERVIEW_FILE)
 
 
-def getDomain(domain_name):
+def getDomainData(domain_name):
     db = TinyDB(WEB_ANAL_FILE)
     DomainQuery = Query()
     result = db.search(DomainQuery.name == domain_name)
