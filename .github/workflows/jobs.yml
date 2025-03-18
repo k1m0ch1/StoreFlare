@@ -17,9 +17,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Generate .env file
         run: |
-          pip install -r requirements.txt
+          echo "CF_API_KEY=${{ secrets.CF_API_KEY }}" >> .env
+          echo "CF_EMAIL=${{ secrets.CF_EMAIL }}" >> .env
+          echo "CF_ZONEID=${{ secrets.CF_ZONEID }}" >> .env
+          echo "CF_ACCOUNTID=${{ secrets.CF_ACCOUNTID }}" >> .env
+          echo "NOTION_APIKEY=${{ secrets.NOTION_APIKEY }}" >> .env
+          echo "NOTION_DBID=${{ secrets.NOTION_DBID }}" >> .env
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Run Notion Job
         id: notion_job
@@ -37,7 +45,7 @@ jobs:
   json:
     needs: notion
     runs-on: ubuntu-latest
-    if: always()  # Ensures this job runs even if the previous job fails
+    if: success()  # Ensures this job runs only if Notion job succeeds
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -47,9 +55,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Generate .env file
         run: |
-          pip install -r requirements.txt
+          echo "CF_API_KEY=${{ secrets.CF_API_KEY }}" >> .env
+          echo "CF_EMAIL=${{ secrets.CF_EMAIL }}" >> .env
+          echo "CF_ZONEID=${{ secrets.CF_ZONEID }}" >> .env
+          echo "CF_ACCOUNTID=${{ secrets.CF_ACCOUNTID }}" >> .env
+          echo "NOTION_APIKEY=${{ secrets.NOTION_APIKEY }}" >> .env
+          echo "NOTION_DBID=${{ secrets.NOTION_DBID }}" >> .env
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Run JSON Job
         id: json_job
@@ -67,7 +83,7 @@ jobs:
   sqlite:
     needs: json
     runs-on: ubuntu-latest
-    if: always()  # Ensures this job runs even if the previous job fails
+    if: success()  # Ensures this job runs only if Notion and JSON jobs succeed
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -77,9 +93,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Generate .env file
         run: |
-          pip install -r requirements.txt
+          echo "CF_API_KEY=${{ secrets.CF_API_KEY }}" >> .env
+          echo "CF_EMAIL=${{ secrets.CF_EMAIL }}" >> .env
+          echo "CF_ZONEID=${{ secrets.CF_ZONEID }}" >> .env
+          echo "CF_ACCOUNTID=${{ secrets.CF_ACCOUNTID }}" >> .env
+          echo "NOTION_APIKEY=${{ secrets.NOTION_APIKEY }}" >> .env
+          echo "NOTION_DBID=${{ secrets.NOTION_DBID }}" >> .env
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Run SQLite Job
         id: sqlite_job
