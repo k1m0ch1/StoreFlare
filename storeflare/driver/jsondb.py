@@ -68,8 +68,10 @@ def insertDomainDate(domainName, dateEntry: DateEntry):
     result = db.search(DomainQuery.name == domainName)
     if result:
         domainData = result[0]
+        domainData["date_lists"].append(dateEntry["date"])
         domainData["dates"].append(dateEntry)
         db.update({"dates": domainData["dates"]}, DomainQuery.name == domainName)
+        db.update({"date_lists": domainData["date_lists"]}, DomainQuery.name == domainname)
         return True
     return False
 

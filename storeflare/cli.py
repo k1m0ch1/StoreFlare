@@ -61,8 +61,12 @@ def main():
     
     daysDifference = (datetime.strptime(newest_date,"%Y-%m-%d")- datetime.strptime(oldest_date,"%Y-%m-%d")).days
 
-
+    print(f"Latest Data tooks {daysDifference} from {oldest_date} to {newest_date}")
     if daysDifference < 30:
+        #dateFormat = "%Y-%m-%dT%H:%M:%SZ"
+        #startDate = f"2025-01-01T00:00:01Z"
+        endDate = datetime.now().strftime(dateFormat)
+
         print("There is no data, lets get 30 days from today")
         getWebAnal = cf.get_web_analytics()
 
@@ -75,6 +79,7 @@ def main():
     else:
         dateFormat = "%Y-%m-%dT%H:%M:%SZ"
         startDate = f"{jsondb.getSecondNewestDate()}T00:00:01Z"
+        #startDate = f"2025-01-01T00:00:01Z"
         endDate = datetime.now().strftime(dateFormat)
 
         print(f"Get data from {startDate} to {endDate}")
