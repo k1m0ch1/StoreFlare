@@ -48,7 +48,7 @@ def main():
 
         if len(getWebAnal['by_domain']['domains']) > 0:
             checkAnalAndStore(getWebAnal, cmd)
-            sys.exit(1)
+            sys.exit(0)
         else:
             print("Can't do")
             sys.exit(1)
@@ -56,7 +56,7 @@ def main():
 
     if newest_date == datetime.now().strftime("%Y-%m-%d"):
         print("Data is updated, end the program")
-        sys.exit(1)       
+        sys.exit(0)       
 
     print("Proceed to check today data and update the data")
     
