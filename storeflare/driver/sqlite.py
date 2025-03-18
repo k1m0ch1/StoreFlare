@@ -115,6 +115,22 @@ def getDomainData(domainName: str, tableName: str):
         return None
     return None
 
+def getDomainDate(domainName: str, date: str, tableName: str):
+    try:
+        conn = sqlite3.connect(DBFILE)
+        cursor = conn.cursor()
+        query = f"SELECT domain_name, date from {tableName} where domain_name='{domainName}' and date='{date}'"
+        cursor.execute(query)
+        conn.commit()
+        result = cursor.fetchone()
+        conn.close()
+
+        return result
+
+    except Exception as e:
+        print(f"Error fetching {domainName} from {tableName}")
+        return None
+    return None
 
 def getDateRange(tableName: str):
     try:
@@ -124,14 +140,13 @@ def getDateRange(tableName: str):
         cursor.execute(query)
         result = cursor.fetchone()
         conn.close()
-
-
+        
         if len(result) >0:
-            return result 
+            return result if result[0] is not None and result[1] is not None else 0,0
         else:
             return 0,0
 
-        return None, None
+        return 0, 0
     except Exception as e:
         print(f"Error fetching newest and oldest date from {tableName} : {e}")
         return None, None

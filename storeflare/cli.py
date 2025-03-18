@@ -26,7 +26,7 @@ def main():
 
 
     cf = cfmetrics.Auth(CF_API_KEY, CF_EMAIL).Account(CF_ACCOUNTID).Zone(CF_ZONEID)
-    
+
     # Lets Provide the Web Analytic First
     # need to check the database first
     # if the 30 days data is already stored or not
@@ -52,6 +52,7 @@ def main():
         else:
             print("Can't do")
             sys.exit(1)
+
 
     if newest_date == datetime.now().strftime("%Y-%m-%d"):
         print("Data is updated, end the program")

@@ -27,14 +27,16 @@ def checkAnalAndStore(dataAnal, cmd):
 
     if cmd == "sqlite":
         for domain in getWebAnal['by_domain']['domains']:
+            domainName = domain['name']
             for item in domain['dates']:
-                dataWebAnalytics = sqlite.WebAnalytics(
-                    domain_name=domain["name"],
-                    date=item["date"],
-                    page_views=item["metrics"]["page_views"],
-                    visits=item["metrics"]["visits"]
-                )
-                saveData = sqlite.insertWebAnalytics(dataWebAnalytics)
+                if sqlite.getDomainDate(domainName, item['date'], 'web_analytics') == None:
+                    dataWebAnalytics = sqlite.WebAnalytics(
+                        domain_name=domain["name"],
+                        date=item["date"],
+                        page_views=item["metrics"]["page_views"],
+                        visits=item["metrics"]["visits"]
+                    )
+                    saveData = sqlite.insertWebAnalytics(dataWebAnalytics)
 
     if cmd == "json":
         for domain in getWebAnal['by_domain']['domains']:
