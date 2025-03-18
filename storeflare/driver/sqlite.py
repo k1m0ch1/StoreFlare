@@ -140,9 +140,12 @@ def getDateRange(tableName: str):
         cursor.execute(query)
         result = cursor.fetchone()
         conn.close()
-        
+
         if len(result) >0:
-            return result if result[0] is not None and result[1] is not None else 0,0
+            if result[0] is not None and result[1] is not None:
+                return result[0], result[1] 
+            else:
+                return 0,0
         else:
             return 0,0
 
