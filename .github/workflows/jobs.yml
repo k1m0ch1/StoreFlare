@@ -38,9 +38,16 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+
+          # Check for changes
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0  # Exit gracefully
+          fi
+      
           git add .
           git commit -m "cronjob $(date '+%Y-%m-%d %H:%M:%S')"
-          git push origin master
+          git push origin master 
 
   json:
     needs: notion
@@ -76,10 +83,18 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+
+          # Check for changes
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0  # Exit gracefully
+          fi
+      
           git add .
           git commit -m "cronjob $(date '+%Y-%m-%d %H:%M:%S')"
-          git push origin master
+          git push origin master 
 
+ 
   sqlite:
     needs: json
     runs-on: ubuntu-latest
@@ -114,7 +129,13 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+
+          # Check for changes
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0  # Exit gracefully
+          fi
+      
           git add .
           git commit -m "cronjob $(date '+%Y-%m-%d %H:%M:%S')"
-          git push origin master
-
+          git push origin master 
