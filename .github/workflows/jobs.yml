@@ -1,0 +1,96 @@
+name: Run StoreFlare Jobs
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'  # Runs every 12 hours
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  notion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Notion Job
+        id: notion_job
+        run: python storeflare/cli.py notion
+
+      - name: Commit and push changes if successful
+        if: success()
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "cronjob $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin master
+
+  json:
+    needs: notion
+    runs-on: ubuntu-latest
+    if: always()  # Ensures this job runs even if the previous job fails
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run JSON Job
+        id: json_job
+        run: python storeflare/cli.py json
+
+      - name: Commit and push changes if successful
+        if: success()
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "cronjob $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin master
+
+  sqlite:
+    needs: json
+    runs-on: ubuntu-latest
+    if: always()  # Ensures this job runs even if the previous job fails
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run SQLite Job
+        id: sqlite_job
+        run: python storeflare/cli.py sqlite
+
+      - name: Commit and push changes if successful
+        if: success()
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "cronjob $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin master
+
