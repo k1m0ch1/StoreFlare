@@ -7,6 +7,11 @@ StoreFlare is an automated data processing tool designed to handle multiple data
 
 This project is an implementation of **[Cloudflare Metric](https://github.com/k1m0ch1/cloudflare-metric)**, designed to enhance the processing and tracking of Cloudflare-related metrics in different formats.
 
+I just store the data with Notion, and you could see here https://storeflare.notion.site/ or https://storeflare.notion.site/Overview
+
+<img src="docs/graph.png" alt="Graph Overview" width=400 />
+<img src="docs/metric2.png" alt="Notion Overview" width=400 />
+
 ## ⚙️ Features
 - ✅ **Automated Data Processing**: Runs scheduled jobs to process Notion, JSON, and SQLite data.
 - 🔄 **GitHub Actions Integration**: Executes commands every **12 hours** with continuous execution, even if a previous job fails.
