@@ -9,8 +9,10 @@ This project is an implementation of **[Cloudflare Metric](https://github.com/k1
 
 I just store the data with Notion, and you could see here https://storeflare.notion.site/ or https://storeflare.notion.site/Overview
 
-<img src="docs/graph.png" alt="Graph Overview" width=400 />
-<img src="docs/metric2.png" alt="Notion Overview" width=400 />
+<p align="center">
+    <img src="docs/graph.png" alt="Graph Overview" width=400 />
+    <img src="docs/metric2.png" alt="Notion Overview" width=400 />
+</p>
 
 ## ⚙️ Features
 - ✅ **Automated Data Processing**: Runs scheduled jobs to process Notion, JSON, and SQLite data.
