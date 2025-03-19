@@ -1,11 +1,31 @@
 import sys
+import os
 
 from driver import jsondb, sqlite, notion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+NOTION_WEBANAL_DBID=os.getenv("NOTION_WEBANAL_DBID")
+NOTION_OVERVIEW_DBID=os.getenv("NOTION_OVERVIEW_DBID")
+
+availableCMD = ["json", "sqlite", "notion"]
+
+def checkOverview(dataOverview, cmd):
+    if cmd == "notion":
+        print("Checkup and Insert data overview to notion")
+
+        for date in dataOverview['by_date']['dates']:
+            currentDateLists = notion.fetch_unique_dates(NOTION_OVERVIEW_DBID)
+            if date['date'] not in currentDateLists:
+                saveData = notion.createDataOverview(date, NOTION_OVERVIEW_DBID)
+                if saveData == False:
+                    print("Error Create New Data")
+                else:
+                    print("Create New Data")
+ 
 
 def checkAnalAndStore(dataAnal, cmd):
-
-    availableCMD = ["json", "sqlite", "notion"]
-    
     if cmd not in availableCMD:
         print("Usage: python cli.py <targetdb[json|sqlite]>")
         sys.exit(1)
@@ -17,8 +37,8 @@ def checkAnalAndStore(dataAnal, cmd):
         for domain in getWebAnal['by_domain']['domains']:
             for date in domain['date_lists']:
                 iD = domain['date_lists'].index(date)
-                if notion.checkDomainEntry(domain['name'], date) == False:
-                    saveData = notion.createNewData(domain['name'], domain['dates'][iD]) 
+                if notion.checkDomainEntry(domain['name'], date, NOTION_WEBANAL_DBID) == False:
+                    saveData = notion.createDataWebAnalytics(domain['name'], domain['dates'][iD], NOTION_WEBANAL_DBID)
                     if saveData == False:
                         print("Error Create New Data")
                     else:

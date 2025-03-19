@@ -79,18 +79,19 @@ def getDateRange():
     db = TinyDB(WEB_ANAL_FILE)
     allDomain = db.all()
     allDates = []
+    ymdformat = "%Y-%m-%d"
 
     for domain in allDomain:
         allDates.extend(domain["date_lists"])
 
     if not allDates:
-        return [0, 0]
+        return [datetime.now().strftime(ymdformat), datetime.now().strftime(ymdformat)]
 
     dateObjects = [datetime.strptime(date, "%Y-%m-%d") for date in allDates]
 
     db.close()
 
-    return [min(dateObjects).strftime("%Y-%m-%d"), max(dateObjects).strftime("%Y-%m-%d")]
+    return [min(dateObjects).strftime(ymdformat), max(dateObjects).strftime(ymdformat)]
 
 def getSecondNewestDate():
     db = TinyDB(WEB_ANAL_FILE)

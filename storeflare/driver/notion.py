@@ -4,13 +4,15 @@ import hashlib
 import json
 import os 
 import sys
+from datetime import datetime
 from pydantic import BaseModel
 from requests.auth import HTTPBasicAuth
 
 load_dotenv()
 
 NOTION_APIKEY=os.getenv("NOTION_APIKEY")
-NOTION_DBID=os.getenv("NOTION_DBID")
+NOTION_WEB_ANAL_DBID=os.getenv("NOTION_WEB_ANAL_DBID")
+NOTION_OVERVIEW_DBID=os.getenv("NOTION_OVERVIEW_DBID")
 NOTION_APIURL="https://api.notion.com/v1"
 NOTION_HEADERS={
     "Authorization": f"Bearer {NOTION_APIKEY}",
@@ -123,7 +125,7 @@ def computeHash(data):
     jsonString = json.dumps(data, sort_keys=True)
     return hashlib.sha256(jsonString.encode()).hexdigest()
 
-def get_database_properties():
+def get_database_properties(NOTION_DBID):
     result = {}
     url = f"{NOTION_APIURL}/databases/{NOTION_DBID}"
     response = requests.get(url, headers=NOTION_HEADERS)
@@ -143,7 +145,7 @@ def get_database_properties():
         return None
 
 
-def fetchAllNotionRecords():
+def fetchAllNotionRecords(NOTION_DBID):
 
     notion_records={}
     query_url = f"{NOTION_APIURL}/databases/{NOTION_DBID}/query"
@@ -173,7 +175,7 @@ def fetchAllNotionRecords():
         payload["start_cursor"] = data["next_cursor"]
     return notion_records
 
-def fetch_unique_dates():
+def fetch_unique_dates(NOTION_DBID):
     """Fetch all records and return a sorted list of unique dates."""
     unique_dates = set()
     has_more = True
@@ -190,7 +192,7 @@ def fetch_unique_dates():
 
         if response.status_code != 200:
             print(f"Error: Unable to fetch Notion data. Status Code: {response.status_code}")
-            print("Response:", response.text)
+            print("Response:", response.text, response.url)
             return []
 
         data = response.json()
@@ -210,13 +212,14 @@ def fetch_unique_dates():
     # Convert to sorted list (oldest to newest)
     return sorted(unique_dates)
 
-def getDateRange():
-    dates = fetch_unique_dates()
+def getDateRange(NOTION_DBID):
+    dates = fetch_unique_dates(NOTION_DBID)
+    ymdformat = "%Y-%m-%d"
     if not dates:
-        return 0, 0
+        return [datetime.now().strftime(ymdformat), datetime.now().strftime(ymdformat)]
     return dates[0], dates[-1]  # Oldest, Newest
 
-def createNewData(domain_name, dateMetric):
+def createDataWebAnalytics(domain_name, dateMetric, NOTION_DBID):
     createPayload = {
         "parent": {"database_id": NOTION_DBID},
         "properties": {
@@ -236,9 +239,46 @@ def createNewData(domain_name, dateMetric):
         raise ValueError(f"Can't get data with error code {saveData.text}")
         return False
 
+
+def createDataOverview(dateMetric, NOTION_DBID):
+    xx, xxxx, xxxxx= [0,0,0]
+    for item in dateMetric['metrics']['responseStatusMap']:
+        if item['key'] >= 200 and item['key'] < 300:
+            xx += item['requests']
+        elif item['key'] >= 400 and item['key'] < 500:
+            xxxx += item['requests']
+        elif item['key'] >= 500 and item['key'] < 600:
+            xxxxx += item['requests']
+
+    createPayload = {
+        "parent": {"database_id": NOTION_DBID},
+        "properties": {
+            "DomainName": setValue('title', 'yggdrasil.id'),
+            "Date": setValue('date', dateMetric['date']),
+            "Page Views": setValue('number', dateMetric["metrics"]["pageViews"]),
+            "Requests": setValue('number', dateMetric["metrics"]["requests"]),
+            "Threats": setValue('number', dateMetric["metrics"]["threats"]),
+            "Bytes": setValue('number', dateMetric["metrics"]["bytes"]),
+            "CachedBytes": setValue('number', dateMetric["metrics"]["cachedBytes"]),
+            "CachedRequests": setValue('number', dateMetric["metrics"]["cachedRequests"]),
+            "Total 2xx": setValue('number', xx),
+            "Total 4xx": setValue('number', xxxx),
+            "Total 5xx": setValue('number', xxxxx),
+        }
+    }
+
+    NOTION_QUERY_URL = f"{NOTION_APIURL}/databases/{NOTION_DBID}/query"
+    saveData = requests.post(f"{NOTION_APIURL}/pages", headers=NOTION_HEADERS, json=createPayload)
+
+    if saveData.status_code==200:
+        return True
+    else:
+        raise ValueError(f"Can't get data with error code {saveData.text}")
+        return False
+
     
 
-def checkDomainEntry(domain_name, date):
+def checkDomainEntry(domain_name, date, NOTION_DBID):
     query_payload = {
         "filter": {
             "and": [

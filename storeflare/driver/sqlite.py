@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from dotenv import load_dotenv
 from typing import Optional
+from datetime import datetime
 
 load_dotenv()
 
@@ -141,18 +142,19 @@ def getDateRange(tableName: str):
         result = cursor.fetchone()
         conn.close()
 
+        ymdformat = "%Y-%m-%d"
+
         if len(result) >0:
             if result[0] is not None and result[1] is not None:
                 return result[0], result[1] 
             else:
-                return 0,0
+                return [datetime.now().strftime(ymdformat), datetime.now().strftime(ymdformat)]
         else:
-            return 0,0
-
-        return 0, 0
+            return [datetime.now().strftime(ymdformat), datetime.now().strftime(ymdformat)]
+        return [datetime.now().strftime(ymdformat), datetime.now().strftime(ymdformat)]
     except Exception as e:
         print(f"Error fetching newest and oldest date from {tableName} : {e}")
-        return None, None
+        return [datetime.now().strftime(ymdformat), datetime.now().strftime(ymdformat)]
 
 def getSecondNewestDate(tableName: str) -> Optional[str]:
     try:

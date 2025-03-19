@@ -5,7 +5,7 @@ import cfmetrics
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from driver import jsondb, sqlite, notion
-from transform import checkAnalAndStore
+from transform import checkAnalAndStore, checkOverview
 
 load_dotenv()
 
@@ -13,6 +13,8 @@ CF_API_KEY=os.getenv("CF_API_KEY")
 CF_EMAIL=os.getenv("CF_EMAIL")
 CF_ACCOUNTID=os.getenv("CF_ACCOUNTID")
 CF_ZONEID=os.getenv("CF_ZONEID")
+NOTION_WEBANAL_DBID=os.getenv("NOTION_WEBANAL_DBID")
+NOTION_OVERVIEW_DBID=os.getenv("NOTION_OVERVIEW_DBID")
 
 def main():
     if len(sys.argv) < 2:
@@ -24,7 +26,7 @@ def main():
         print("Usage: python cli.py <targetdb[json|sqlite]>")
         sys.exit(1)
 
-
+    ymdformat = "%Y-%m-%d"
     cf = cfmetrics.Auth(CF_API_KEY, CF_EMAIL).Account(CF_ACCOUNTID).Zone(CF_ZONEID)
 
     # Lets Provide the Web Analytic First
@@ -32,61 +34,63 @@ def main():
     # if the 30 days data is already stored or not
     # if already stored, check today data and stored
     # if not then stored for 30 days before
-    source = "web_analytics"
+    source = ["web_analytics", "overview"]
+    NOTION_DBID = [NOTION_WEBANAL_DBID, NOTION_OVERVIEW_DBID]
 
-    oldest_date, newest_date = [0, 0]
-    if cmd == "json":
-        oldest_date, newest_date = jsondb.getDateRange()
-    if cmd == "sqlite":
-        oldest_date, newest_date = sqlite.getDateRange(source)
-    if cmd == "notion":
-        oldest_date, newest_date = notion.getDateRange()
+    for index, srcNotion in enumerate(NOTION_DBID):
 
-    if oldest_date == 0 and newest_date ==0 :
-        print("No data available, lets just gather")
-        getWebAnal = cf.get_web_analytics()
+        print(f"get {source[index]}")
 
-        if len(getWebAnal['by_domain']['domains']) > 0:
-            checkAnalAndStore(getWebAnal, cmd)
-            sys.exit(0)
-        else:
-            print("Can't do")
-            sys.exit(1)
+        oldest_date, newest_date = [datetime.now().strftime(ymdformat), datetime.now().strftime(ymdformat)]
+        if cmd == "json":
+            oldest_date, newest_date = jsondb.getDateRange()
+        if cmd == "sqlite":
+            oldest_date, newest_date = sqlite.getDateRange(source[index])
+        if cmd == "notion":
+            oldest_date, newest_date = notion.getDateRange(srcNotion)
 
-
-    if newest_date == datetime.now().strftime("%Y-%m-%d"):
-        print("Data is updated, end the program")
-        sys.exit(0)       
-
-    print("Proceed to check today data and update the data")
+        print("Proceed to check today data and update the data")
     
-    daysDifference = (datetime.strptime(newest_date,"%Y-%m-%d")- datetime.strptime(oldest_date,"%Y-%m-%d")).days
+        daysDifference = (datetime.strptime(newest_date,"%Y-%m-%d")- datetime.strptime(oldest_date,"%Y-%m-%d")).days
 
-    print(f"Latest Data tooks {daysDifference} from {oldest_date} to {newest_date}")
-    if daysDifference < 30:
-        #dateFormat = "%Y-%m-%dT%H:%M:%SZ"
-        #startDate = f"2025-01-01T00:00:01Z"
-        endDate = datetime.now().strftime(dateFormat)
+        print(f"Latest Data tooks {daysDifference} from {oldest_date} to {newest_date}")
+        
+        if daysDifference < 30:
+            #dateFormat = "%Y-%m-%dT%H:%M:%SZ"
+            #startDate = f"2025-01-01T00:00:01Z"
+            #endDate = datetime.now().strftime(dateFormat)
 
-        print("There is no data, lets get 30 days from today")
-        getWebAnal = cf.get_web_analytics()
+            print("There is no data, lets get 30 days from today")
+            if source[index] == "web_analytics":
+                getWebAnal = cf.get_web_analytics()
+                if len(getWebAnal['by_domain']['domains']) >0:
+                    checkAnalAndStore(getWebAnal, cmd)
+                else:
+                    print("No Data")
 
-        if len(getWebAnal['by_domain']['domains']) >0:
-            checkAnalAndStore(getWebAnal, cmd)
+            elif source[index] == "overview":
+                getData = cf.get_overview()
+                if len(getData['by_date']['date_lists']) >0:
+                    checkOverview(getData, cmd)
+                else:
+                    print("No Data")
+            
+        # only get today
         else:
-            print("No Data")
+            if newest_date == datetime.now().strftime("%Y-%m-%d"):
+                print("Data is updated")
+                continue
 
-    # only get today
-    else:
-        dateFormat = "%Y-%m-%dT%H:%M:%SZ"
-        startDate = f"{jsondb.getSecondNewestDate()}T00:00:01Z"
-        #startDate = f"2025-01-01T00:00:01Z"
-        endDate = datetime.now().strftime(dateFormat)
+            dateFormat = "%Y-%m-%dT%H:%M:%SZ"
+            startDate = f"{jsondb.getSecondNewestDate()}T00:00:01Z"
+            #startDate = f"2025-01-01T00:00:01Z"
+            endDate = datetime.now().strftime(dateFormat)
 
-        print(f"Get data from {startDate} to {endDate}")
-        getWebAnal = cf.get_web_analytics(start_date=startDate, end_date=endDate)
+            print(f"Get data from {startDate} to {endDate}")
+            getWebAnal = cf.get_web_analytics(start_date=startDate, end_date=endDate)
 
-        checkAnalAndStore(getWebAnal, cmd)
+            checkAnalAndStore(getWebAnal, cmd)
+
 
 if __name__ == "__main__":
     main()
